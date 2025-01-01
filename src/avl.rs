@@ -1,8 +1,9 @@
-use core::option::Option::{None, Some};
-use std::cell::RefCell;
-use std::cmp::max;
-use std::fs::OpenOptions;
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    clone,
+    cmp::{max, Ordering},
+    rc::Rc,
+};
 
 #[derive(Debug)]
 pub struct TreeNode {
@@ -21,22 +22,6 @@ impl TreeNode {
             height: 0,
             left: None,
             right: None,
-        }
-    }
-
-    pub fn insert(&mut self, node: TreeNode) {
-        if self.val > node.val {
-            match &self.left {
-                Some(left) => left.borrow_mut().insert(node),
-                None => self.left = Some(Rc::new(RefCell::new(node))),
-            }
-        } else if self.val < node.val {
-            match &self.right {
-                Some(right) => right.borrow_mut().insert(node),
-                None => self.right = Some(Rc::new(RefCell::new(node))),
-            }
-        } else {
-            println!("Inserted {:?}", node)
         }
     }
 
@@ -123,6 +108,32 @@ impl TreeNode {
             }
         } else {
             node
+        }
+    }
+
+    pub fn insert(&mut self, val: i32) {}
+
+    fn insert_helper(node: OptionTreeNodeRc, val: i32) -> OptionTreeNodeRc {
+        match node {
+            Some(mut node) => {
+                match { node.borrow().val }.cmp(&val) {
+                    Ordering::Greater => {
+                        let left = node.borrow().left.clone();
+                        Self::insert_helper(left, val);
+                    }
+                    Ordering::Less => {
+                        let right = node.borrow().right.clone();
+                        Self::insert_helper(right, val);
+                    }
+                    Ordering::Equal => {
+                        return Some(node.clone());
+                    }
+                }
+                Self::update_height(Some(node.clone()));
+                node = Self::rotate(Some(node)).unwrap();
+                Some(node)
+            }
+            None => Some(Rc::new(RefCell::new(TreeNode::new(val)))),
         }
     }
 }
