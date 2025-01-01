@@ -1,6 +1,5 @@
 use std::{
     cell::RefCell,
-    clone,
     cmp::{max, Ordering},
     rc::Rc,
 };
