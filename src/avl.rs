@@ -110,19 +110,26 @@ impl TreeNode {
         }
     }
 
-    pub fn insert(&mut self, val: i32) {}
+    pub fn insert(node: OptionTreeNodeRc, val: i32) -> OptionTreeNodeRc {
+        Self::insert_helper(node, val)
+    }
 
     fn insert_helper(node: OptionTreeNodeRc, val: i32) -> OptionTreeNodeRc {
         match node {
             Some(mut node) => {
-                match { node.borrow().val }.cmp(&val) {
+                match {
+                    let node_val = node.borrow().val;
+                    node_val
+                }
+                .cmp(&val)
+                {
                     Ordering::Greater => {
                         let left = node.borrow().left.clone();
-                        Self::insert_helper(left, val);
+                        node.borrow_mut().left = Self::insert_helper(left, val);
                     }
                     Ordering::Less => {
                         let right = node.borrow().right.clone();
-                        Self::insert_helper(right, val);
+                        node.borrow_mut().right = Self::insert_helper(right, val);
                     }
                     Ordering::Equal => {
                         return Some(node.clone());
